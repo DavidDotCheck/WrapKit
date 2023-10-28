@@ -97,23 +97,28 @@ invoke docs
 ## How to contribute
 
 We welcome contributions from the community! Please read our [contributing guidelines](CONTRIBUTING.md) to learn how to submit a pull request.
+
 ---
 ## License
 
 This project is licensed under the terms of the [MIT License](LICENSE).
+
 ---
 ## FAQ
 
 **Q:** How do i troubleshoot an installation issue?
 **A:** See [troubleshooting](#troubleshooting).
+
 ---
 ## Troubleshooting
 
 If you encounter any bugs, please [file an issue](https://api.github.com/repos/DavidDotCheck/WrapKit/issues) along with a detailed description.
+
 ---
 ## Credits
 
 This project was created with [PyLibTemplate](https://github.com/DavidDotCheck/py-lib-template).
+
 ---
 ## Version history
 
