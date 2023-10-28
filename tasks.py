@@ -23,7 +23,7 @@ def test(c):
 
 @task
 def docs(c):
-    c.run("sphinx-apidoc -f -o docs/source {{project.package_name}}")
+    c.run("sphinx-apidoc -f -o docs/source WrapKit")
     c.run("sphinx-build -b html docs/source docs/build")
 
 
@@ -34,8 +34,8 @@ def clean(c):
         "dist",
         "docs/build",
         "docs/modules.rst",
-        "docs/{{project.package_name}}.rst",
-        "{{project.package_name}}.egg-info",
+        "docs/WrapKit.rst",
+        "WrapKit.egg-info",
         ".meta",        
     ]
 
