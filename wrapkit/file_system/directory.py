@@ -171,18 +171,6 @@ class Directory(FileSystemObject):
         self.parts = self._path.split(os.sep)
 
     @ensure_path_is("dir")
-    def write_file_raw(self, name: str, content: str):
-        with open(os.path.join(self.path, name), "w") as f:
-            f.write(content)
-
-    @ensure_path_is("dir")
-    def read_file_raw(self, name: str):
-        if not os.path.isfile(os.path.join(self.path, name)):
-            return None
-        with open(os.path.join(self.path, name), "r") as f:
-            return f.read()
-
-    @ensure_path_is("dir")
     def delete(self, force=False):
         try:
             if force:
