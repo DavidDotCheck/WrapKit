@@ -51,9 +51,11 @@ class Directory(FileSystemObject):
     @ensure_path_is("dir")
     def permissions(self):
         if os.name == "nt":
-            raise NotImplementedError("Getting permissions is not supported on Windows.")
+            raise NotImplementedError(
+                "Getting permissions is not supported on Windows."
+            )
         else:
-            st = os.stat(self.path)            
+            st = os.stat(self.path)
             permissions = oct(st.st_mode)[-3:]
             return permissions
 
@@ -272,6 +274,7 @@ class Directory(FileSystemObject):
 
         return deleted_items
 
+    @staticmethod
     def _file_deletable(file_path):
         if not os.access(file_path, os.W_OK):
             return False  # No write permission
@@ -401,12 +404,14 @@ class Directory(FileSystemObject):
     @ensure_path_is("dir")
     def change_permissions(self, mode: Union[int, str]):
         if os.name == "nt":
-            raise NotImplementedError("Changing permissions is not supported on Windows.")
+            raise NotImplementedError(
+                "Changing permissions is not supported on Windows."
+            )
         else:
             if isinstance(mode, str):
                 mode = int(mode, 8)
             os.chmod(self.path, mode)
-            
+
     @ensure_path_is("dir")
     def change_owner(self, owner: str, group: Optional[str] = None):
         if os.name == "nt":
@@ -415,10 +420,9 @@ class Directory(FileSystemObject):
             # Get the uid and gid from the username and group name
             uid = pwd.getpwnam(owner).pw_uid
             gid = grp.getgrnam(group).gr_gid
-            
+
             # Change the owner and group of the directory
             os.chown(self.path, uid, gid)
-
 
     @staticmethod
     @contextmanager
@@ -427,9 +431,9 @@ class Directory(FileSystemObject):
             raise OSError(
                 "Path already exists. Using an existing directory will delete it and all of its contents. Use exist_ok=True to allow this."
             )
-            
+
         if path is None:
-            path = tf.mkdtemp()       
+            path = tf.mkdtemp()
 
         dir = Directory(path, create=True)
 
@@ -437,9 +441,11 @@ class Directory(FileSystemObject):
             raise OSError("Cannot change path of temporary directory.")
 
         dir.set_path = raise_
-        
+
         try:
             yield dir
         finally:
-            dir.delete_contents(match="*", force=True, recursive=True, delete_hidden=True)
+            dir.delete_contents(
+                match="*", force=True, recursive=True, delete_hidden=True
+            )
             dir.delete(force=True)

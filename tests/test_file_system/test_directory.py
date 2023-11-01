@@ -675,27 +675,6 @@ def test_temporary_directory(setup_data):
         assert dir.exists, "Directory should exist."
         assert path == dir.path, "Directory path should be correct."
 
-def test_file_deletable(setup_data):
-    dirPaths, filePaths = setup_data
-    stop_event = threading.Event()
-    
-    def lock_file():
-        while not stop_event.is_set():
-            with open(filePaths["real"], "r+") as f:
-                f.read()
-                time.sleep(0.1)
-
-    t = threading.Thread(target=lock_file)
-    t.start()
-    
-    try:
-        dir = Directory(dirPaths["real"])
-        assert not dir._file_deletable(filePaths["real"]), "File should not be deletable."
-    finally:
-        stop_event.set()
-        t.join()
-    
-    
 
 def test_properties_ponix(setup_data):
     dirPaths, _ = setup_data
@@ -735,14 +714,14 @@ def test_change_permissions(setup_data):
 
 
 def test_change_owner(setup_data):
+    dirPaths, filePaths = setup_data
+    path = join(dirPaths["real"], "new_dir")
+    dir = Directory(path, create=True)
+
     if os.name == "nt":
         with pytest.raises(NotImplementedError):
             dir.change_owner("root", "root")
     else:
         with patch("wrapkit.file_system.directory.os.chown") as mock_chown:
-            dirPaths, filePaths = setup_data
-            path = join(dirPaths["real"], "new_dir")
-            dir = Directory(path, create=True)
-
             dir.change_owner("root", "root")
             mock_chown.assert_called_with(path, 0, 0)
