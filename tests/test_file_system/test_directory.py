@@ -225,42 +225,6 @@ def test_initialization_set_path(
         assert dir.exists == should_exist, msg
 
 
-# only run on posix systems (!= windows)
-@pytest.mark.skipif(
-    sys.platform == "win32", reason="Permissions are not supported on Windows."
-)
-def test_properties_ponix(setup_data):
-    dirPaths, _ = setup_data
-    # Test accessing the path, root, name, parent, exists, permissions, owner, group, and size properties.
-    dir = Directory(dirPaths["real"])
-    verify_directory(dir, dirPaths["real"])
-    assert dir.exists, "Directory should exist but does not."
-    assert dir.permissions == oct(os.stat(dirPaths["real"]).st_mode)[-3:], (
-        "Permissions should be "
-        + oct(os.stat(dirPaths["real"]).st_mode)[-3:]
-        + " but are "
-        + dir.permissions
-    )
-    assert dir.owner == os.stat(dirPaths["real"]).st_uid, (
-        "Owner should be "
-        + str(os.stat(dirPaths["real"]).st_uid)
-        + " but is "
-        + str(dir.owner)
-    )
-    assert dir.group == os.stat(dirPaths["real"]).st_gid, (
-        "Group should be "
-        + str(os.stat(dirPaths["real"]).st_gid)
-        + " but is "
-        + str(dir.group)
-    )
-    assert dir.size == os.stat(dirPaths["real"]).st_size, (
-        "Size should be "
-        + str(os.stat(dirPaths["real"]).st_size)
-        + " but is "
-        + str(dir.size)
-    )
-
-
 def test_enter_exit(setup_data):
     dirPaths, filePaths = setup_data
     # Test __enter__ and __exit__
@@ -589,8 +553,16 @@ def test_list(
                 filled_dir_index > filled_dir_file_index
             ), f"Expected {fdf} to be before {filled_dir_index} but it is {filled_dir_file_index}"
 
-    list_dirs = dir.list_dirs(match=match, hidden=hidden, recursive=recursive) if include_dirs else []
-    list_files = dir.list_files(match=match, hidden=hidden, recursive=recursive) if include_files else []
+    list_dirs = (
+        dir.list_dirs(match=match, hidden=hidden, recursive=recursive)
+        if include_dirs
+        else []
+    )
+    list_files = (
+        dir.list_files(match=match, hidden=hidden, recursive=recursive)
+        if include_files
+        else []
+    )
     assert file_count == len(
         list_files
     ), '"list_files" should return the same number of files as "list"'
@@ -598,8 +570,8 @@ def test_list(
     assert dir_count == len(
         list_dirs
     ), '"list_dirs" should return the same number of dirs as "list"'
-    
-    
+
+
 def test_create(setup_data):
     dirPaths, filePaths = setup_data
     # Test creating a directory that does not exist.
@@ -611,20 +583,24 @@ def test_create(setup_data):
     # Test creating a directory that already exists without exist_ok set to True.
     with pytest.raises(OSError):
         dir.create()
-        
+
     # Test creating a directory that already exists with exist_ok set to True.
     dir.create(exist_ok=True)
     assert dir.exists, "Directory should exist after creation."
-    
+
+
 def test_create_dir(setup_data):
     dirPaths, filePaths = setup_data
     # Test creating a new directory within the directory.
     dir = Directory(dirPaths["real"])
     new_dir = dir.create_dir("new_dir")
     assert new_dir.exists, "Directory should exist after creation."
-    assert new_dir.path == join(dirPaths["real"], "new_dir"), "Directory path should be correct."
+    assert new_dir.path == join(
+        dirPaths["real"], "new_dir"
+    ), "Directory path should be correct."
     assert dir["new_dir"] == new_dir, "Directory should be accessible by name."
-    
+
+
 def test_move(setup_data):
     dirPaths, filePaths = setup_data
     # Test moving the directory to a new path.
@@ -636,7 +612,8 @@ def test_move(setup_data):
     assert dir.path == new_path, "Directory path should be correct."
     assert dir.exists, "Directory should exist at new path."
     assert not os.path.exists(path), "Directory should not exist at old path."
-    
+
+
 def test_create_copy(setup_data):
     dirPaths, filePaths = setup_data
     # Test creating a copy of the directory at a new path.
@@ -648,7 +625,8 @@ def test_create_copy(setup_data):
     assert dir.path == path, "Directory path should be correct."
     assert dir.exists, "Directory should exist at old path."
     assert os.path.exists(new_path), "Directory should exist at new path."
-    
+
+
 def test_rename(setup_data):
     dirPaths, filePaths = setup_data
     # Test renaming the directory.
@@ -656,9 +634,61 @@ def test_rename(setup_data):
     dir = Directory(path)
     dir.create()
     dir.rename("new_name")
-    assert dir.path == join(dirPaths["real"], "new_name"), "Directory path should be correct."
+    assert dir.path == join(
+        dirPaths["real"], "new_name"
+    ), "Directory path should be correct."
     assert dir.exists, "Directory should exist at new path."
     assert not os.path.exists(path), "Directory should not exist at old path."
+
+
+def test_temporary_directory(setup_data):
+    dirPaths, filePaths = setup_data
+    # Test creating a temporary directory without a path.
+    with Directory.temporary_directory() as dir:
+        assert dir.exists, "Directory should exist."
+        assert "tmp" in dir.path, "Directory path should contain 'tmp'."
+
+    # Test creating a temporary directory with a path that exists.
+    with pytest.raises(OSError):
+        with Directory.temporary_directory(dirPaths["real"]) as dir:
+            None
+
+    # Test creating a temporary directory with a path that does not exist.
+    with Directory.temporary_directory(join(dirPaths["real"], "new_dir")) as dir:
+        assert dir.exists, "Directory should exist."
+        assert (
+            join(dirPaths["real"], "new_dir") == dir.path
+        ), "Directory path should be correct."
+
+    # Test changing the path of a temporary directory.
+    with pytest.raises(OSError):
+        with Directory.temporary_directory() as dir:
+            dir.set_path(dirPaths["real"])
+
+    # Test deleting and creating a temporary directory.
+    with Directory.temporary_directory() as dir:
+        path = dir.path
+        assert dir.exists, "Directory should exist."
+        dir.delete()
+        assert not os.path.exists(path), "Directory should not exist."
+        dir.create()
+        assert dir.exists, "Directory should exist."
+        assert path == dir.path, "Directory path should be correct."
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="Permissions are not supported on Windows."
+)
+def test_properties_ponix(setup_data):
+    dirPaths, _ = setup_data
+    # Test accessing the path, root, name, parent, exists, permissions, owner, group, and size properties.
+    dir = Directory(dirPaths["real"])
+    verify_directory(dir, dirPaths["real"])
+    assert dir.exists, "Directory should exist but does not."
+    assert dir.permissions == oct(os.stat(dirPaths["real"]).st_mode)[-3:]
+    assert dir.owner == os.stat(dirPaths["real"]).st_uid
+    assert dir.group == os.stat(dirPaths["real"]).st_gid
+    assert dir.size == os.stat(dirPaths["real"]).st_size
+
 
 @pytest.mark.skipif(
     sys.platform == "win32", reason="Permissions are not supported on Windows."
@@ -671,7 +701,8 @@ def test_change_permissions(setup_data):
     dir.create()
     dir.change_permissions("777")
     assert dir.permissions == "777", "Permissions should be 777."
-    
+
+
 @pytest.mark.skipif(
     sys.platform == "win32", reason="Permissions are not supported on Windows."
 )
@@ -679,55 +710,12 @@ def test_change_owner(setup_data):
     dirPaths, filePaths = setup_data
     # Test changing the owner of the directory.
     path = join(dirPaths["real"], "new_dir")
-    dir = Directory(path)
-    dir.create()
-    dir.change_owner("root")
+    dir = Directory(path, create=True)
+    dir.change_owner("root", "root")
     assert dir.owner == 0, "Owner should be 0."
-    
-@pytest.mark.skipif(
-    sys.platform == "win32", reason="Permissions are not supported on Windows."
-)
-def test_change_group(setup_data):
-    dirPaths, filePaths = setup_data
-    # Test changing the group of the directory.
-    path = join(dirPaths["real"], "new_dir")
-    dir = Directory(path)
-    dir.create()
-    dir.change_group("root")
     assert dir.group == 0, "Group should be 0."
-    
-def test_temporary_directory(setup_data):
-    dirPaths, filePaths = setup_data
-    # Test creating a temporary directory without a path.
-    with Directory.temporary_directory() as dir:
-        assert dir.exists, "Directory should exist."
-        assert "tmp" in dir.path, "Directory path should contain 'tmp'."
-        
-    # Test creating a temporary directory with a path that exists.
-    with pytest.raises(OSError):
-        with Directory.temporary_directory(dirPaths["real"]) as dir:
-            None
-            
-    # Test creating a temporary directory with a path that does not exist.
-    with Directory.temporary_directory(join(dirPaths["real"], "new_dir")) as dir:
-        assert dir.exists, "Directory should exist."
-        assert join(dirPaths["real"], "new_dir") == dir.path, "Directory path should be correct."
-                
-    # Test changing the path of a temporary directory.
-    with pytest.raises(OSError):
-        with Directory.temporary_directory() as dir:
-            dir.set_path(dirPaths["real"])
-            
-    # Test deleting and creating a temporary directory.
-    with Directory.temporary_directory() as dir:
-        path = dir.path
-        assert dir.exists, "Directory should exist."
-        dir.delete()
-        assert not os.path.exists(path), "Directory should not exist."
-        dir.create()
-        assert dir.exists, "Directory should exist."
-        assert path == dir.path, "Directory path should be correct."
-        
+
+
 
 if __name__ == "__main__":
     # execute test_temporary_directory only

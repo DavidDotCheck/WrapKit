@@ -410,27 +410,26 @@ class Directory(FileSystemObject):
         self.set_path(os.path.join(self.parent, new_name))
 
     @ensure_path_is("dir")
-    def change_permissions(self, mode: int):
+    def change_permissions(self, mode: Union[int, str]):
         if os.name == "nt":
-            raise NotImplementedError(
-                "Changing permissions is not supported on Windows."
-            )
+            raise NotImplementedError("Changing permissions is not supported on Windows.")
         else:
+            if isinstance(mode, str):
+                mode = int(mode, 8)
             os.chmod(self.path, mode)
-
+            
     @ensure_path_is("dir")
-    def change_owner(self, owner: str, group: str):
+    def change_owner(self, owner: str, group: Optional[str] = None):
         if os.name == "nt":
             raise NotImplementedError("Changing owner is not supported on Windows.")
         else:
-            os.chown(self.path, owner, group)
+            # Get the uid and gid from the username and group name
+            uid = pwd.getpwnam(owner).pw_uid
+            gid = grp.getgrnam(group).gr_gid
+            
+            # Change the owner and group of the directory
+            os.chown(self.path, uid, gid)
 
-    @ensure_path_is("dir")
-    def change_group(self, group: str):
-        if os.name == "nt":
-            raise NotImplementedError("Changing group is not supported on Windows.")
-        else:
-            os.chown(self.path, -1, group)
 
     @staticmethod
     @contextmanager
