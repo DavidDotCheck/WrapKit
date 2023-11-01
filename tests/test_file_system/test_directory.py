@@ -8,7 +8,7 @@ import pytest
 
 from wrapkit.file_system import Directory
 import tempfile as tf
-from _test_util import create_file, create_directory, delete_file, delete_directory
+from ._test_util import create_file, create_directory, delete_file, delete_directory
 from os.path import join
 
 
@@ -691,7 +691,9 @@ def test_properties_ponix(setup_data):
     assert dir.group == os.stat(dirPaths["real"]).st_gid
     assert dir.size == 9
 
-
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="Permissions are not supported on Windows."
+)
 def test_change_permissions(setup_data):
     with patch('wrapkit.file_system.directory.os.chmod') as mock_chmod:
         dirPaths, filePaths = setup_data
@@ -708,7 +710,9 @@ def test_change_permissions(setup_data):
         mock_chmod.assert_called_with(path, 0o777)
 
 
-
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="Permissions are not supported on Windows."
+)
 def test_change_owner(setup_data):
     with patch('wrapkit.file_system.directory.os.chown') as mock_chown:
         dirPaths, filePaths = setup_data

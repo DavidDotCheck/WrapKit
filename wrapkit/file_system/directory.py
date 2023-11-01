@@ -3,14 +3,15 @@ import os
 import shutil
 import fnmatch
 import tempfile as tf
-import pwd
-import grp
 
 from contextlib import contextmanager
 from typing import Optional, Union
 from ._util import FileSystemObject, ensure_path_is
 from .file import File
 
+if os.name != "nt":
+    import pwd
+    import grp
 
 
 class Directory(FileSystemObject):
