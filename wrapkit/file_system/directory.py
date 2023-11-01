@@ -10,8 +10,7 @@ import tempfile as tf
 from contextlib import contextmanager
 from pathlib import Path
 import subprocess
-from typing import List, Literal, Optional, Union
-from typing_extensions import override
+from typing import List, Literal, Optional, Union, override
 from ._util import FileSystemObject, ensure_path_is
 from .file import File
 
