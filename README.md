@@ -12,12 +12,10 @@
 - [overview](#overview)
 - [prerequisites](#prerequisites)
 - [installation](#installation)
-- [quickstart](#quickstart)
-- [features](#features)
 - [usage](#usage)
 - [running tests](#running-tests)
 - [build documentation](#build-documentation)
-- [contributing](#contributing)
+- [contributing](#how-to-contribute)
 - [license](#license)
 - [troubleshooting](#troubleshooting)
 - [credits](#credits)
@@ -52,20 +50,7 @@ cd WrapKit
 pip install .
 ```
 ---
-## Quickstart
 
-### Run the application
-
-```bash
-python WrapKit
-```
----
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
----
 ## Usage
 
 ### File System Example
