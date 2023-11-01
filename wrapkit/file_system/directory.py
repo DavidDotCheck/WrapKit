@@ -1,4 +1,5 @@
 # wrapkit/file_system/directory.py
+from abc import abstractmethod
 import os
 import shutil
 import fnmatch
@@ -20,6 +21,8 @@ class Directory(FileSystemObject):
 
         self.set_path(path, create)
 
+    # override
+    @abstractmethod
     def is_dir(self):
         return True
 

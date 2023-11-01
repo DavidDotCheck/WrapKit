@@ -8,7 +8,7 @@ import pytest
 
 from wrapkit.file_system import Directory
 import tempfile as tf
-from ._test_util import create_file, create_directory, delete_file, delete_directory
+from ._util import create_file, create_directory, delete_file, delete_directory
 from os.path import join
 
 
@@ -441,9 +441,6 @@ def test_delete_contents(
         "force": force,
     }
 
-    if deleted_dirs == 40 and deleted_files == 0:
-        None
-
     if exception:
         with pytest.raises(exception):
             dir.delete_contents(**args)
@@ -524,7 +521,7 @@ def test_list(
 
     if exception:
         with pytest.raises(exception):
-            dirs, files = dir.list(**args)
+            dir.list(**args)
 
     else:
         dirs, files = dir.list(**args)
@@ -652,7 +649,7 @@ def test_temporary_directory(setup_data):
     # Test creating a temporary directory with a path that exists.
     with pytest.raises(OSError):
         with Directory.temporary_directory(dirPaths["real"]) as dir:
-            None
+            pytest.fail("Should not be able to create a temporary directory.")
 
     # Test creating a temporary directory with a path that does not exist.
     with Directory.temporary_directory(join(dirPaths["real"], "new_dir")) as dir:
@@ -722,9 +719,3 @@ def test_change_owner(setup_data):
         
         # Check if os.chown was called with correct arguments
         mock_chown.assert_called_with(path, 0, 0)  # Replace 1000 with the actual uid and gid
-
-
-
-if __name__ == "__main__":
-    # execute test_temporary_directory only
-    pytest.main()
