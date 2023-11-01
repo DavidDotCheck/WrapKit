@@ -1,18 +1,16 @@
 # wrapkit/file_system/directory.py
-from functools import wraps
-import itertools
 import os
 import shutil
 import fnmatch
 import tempfile as tf
-
+import pwd
+import grp
 
 from contextlib import contextmanager
-from pathlib import Path
-import subprocess
-from typing import List, Literal, Optional, Union
+from typing import Optional, Union
 from ._util import FileSystemObject, ensure_path_is
 from .file import File
+
 
 
 class Directory(FileSystemObject):
@@ -45,34 +43,34 @@ class Directory(FileSystemObject):
     def exists(self):
         return os.path.exists(self.path)
 
-    @ensure_path_is("dir")
     @property
+    @ensure_path_is("dir")
     def permissions(self):
         if os.name == "nt":
-            raise NotImplementedError(
-                "Getting permissions is not supported on Windows."
-            )
+            raise NotImplementedError("Getting permissions is not supported on Windows.")
         else:
-            return oct(os.stat(self.path).st_mode)[-3:]
+            st = os.stat(self.path)            
+            permissions = oct(st.st_mode)[-3:]
+            return permissions
 
-    @ensure_path_is("dir")
     @property
+    @ensure_path_is("dir")
     def owner(self):
         if os.name == "nt":
             raise NotImplementedError("Getting owner is not supported on Windows.")
         else:
             return os.stat(self.path).st_uid
 
-    @ensure_path_is("dir")
     @property
+    @ensure_path_is("dir")
     def group(self):
         if os.name == "nt":
             raise NotImplementedError("Getting group is not supported on Windows.")
         else:
             return os.stat(self.path).st_gid
 
-    @ensure_path_is("dir")
     @property
+    @ensure_path_is("dir")
     def size(self):
         total_size = 0
         for dirpath, dirnames, filenames in os.walk(self.path):
