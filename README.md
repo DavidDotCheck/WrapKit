@@ -113,3 +113,4 @@ This project was created with [PyLibTemplate](https://github.com/DavidDotCheck/p
 
 - 0.1.0 - Initial Skeleton
 - 0.1.1 - README.md Updates
+- 0.2.0 - Added file_system module with File and Directory classes
