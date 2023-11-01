@@ -25,7 +25,10 @@
 
 ---
 ## Overview
-Briefly describe the purpose of this project and the problem it solves. Provide context to help users understand its value.
+
+WrapKit is a versatile Python library that provides a variety of Object-Oriented Wrapper Classes for common concepts such as Files, Directories, and more. 
+It is designed to be easy to use, and easy to extend. It is also designed to be cross-platform, maintaining compatibility with Windows, Linux, and MacOS.
+
 ---
 ## Prerequisites
 
@@ -65,19 +68,20 @@ python WrapKit
 ---
 ## Usage
 
-### Command line arguments
+### File System Example
+  
+  ```python
+  from wrapkit.file_system import File, Directory
 
-```bash
-python WrapKit --help
-```
+  # Create a file
+  file = File(content_type="text/plain", content="Hello World!", path="hello.txt")
 
-### Environment variables
+  # Create a directory
+  directory = Directory(path="my_directory")
+  directory.create()
+  directory.add_file(file)
+  ```
 
-```bash
-export WrapKit_ENV_VAR_1=value
-export WrapKit_ENV_VAR_2=value
-```
----
 ## Running tests
 
 To run tests, execute this command in the project's root directory:
@@ -122,5 +126,5 @@ This project was created with [PyLibTemplate](https://github.com/DavidDotCheck/p
 ---
 ## Version history
 
-- 0.1.0 - Initial release
-- 0.2.0 - Bug fixes
+- 0.1.0 - Initial Skeleton
+- 0.1.1 - README.md Updates
