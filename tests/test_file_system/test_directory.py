@@ -674,48 +674,52 @@ def test_temporary_directory(setup_data):
         assert path == dir.path, "Directory path should be correct."
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32", reason="Permissions are not supported on Windows."
-)
 def test_properties_ponix(setup_data):
     dirPaths, _ = setup_data
     # Test accessing the path, root, name, parent, exists, permissions, owner, group, and size properties.
     dir = Directory(dirPaths["real"])
     verify_directory(dir, dirPaths["real"])
-    assert dir.exists, "Directory should exist but does not."
-    assert dir.permissions == oct(os.stat(dirPaths["real"]).st_mode)[-3:]
-    assert dir.owner == os.stat(dirPaths["real"]).st_uid
-    assert dir.group == os.stat(dirPaths["real"]).st_gid
     assert dir.size == 9
+    if os.name == "nt":
+        with pytest.raises(NotImplementedError):
+            dir.permissions
+        with pytest.raises(NotImplementedError):
+            dir.owner
+        with pytest.raises(NotImplementedError):
+            dir.group
+    else:
+        assert dir.exists, "Directory should exist but does not."
+        assert dir.permissions == oct(os.stat(dirPaths["real"]).st_mode)[-3:]
+        assert dir.owner == os.stat(dirPaths["real"]).st_uid
+        assert dir.group == os.stat(dirPaths["real"]).st_gid
 
-@pytest.mark.skipif(
-    sys.platform == "win32", reason="Permissions are not supported on Windows."
-)
+
 def test_change_permissions(setup_data):
-    with patch('wrapkit.file_system.directory.os.chmod') as mock_chmod:
+    with patch("wrapkit.file_system.directory.os.chmod") as mock_chmod:
         dirPaths, filePaths = setup_data
         path = join(dirPaths["real"], "new_dir")
         dir = Directory(path)
         dir.create()
 
-        dir.change_permissions("755")
-        # Check if os.chmod was called with correct arguments for 755
-        mock_chmod.assert_called_with(path, 0o755)
-        
-        dir.change_permissions("777")
-        # Check if os.chmod was called with correct arguments for 777
-        mock_chmod.assert_called_with(path, 0o777)
+        if os.name == "nt":
+            with pytest.raises(NotImplementedError):
+                dir.change_permissions("755")
+        else:
+            dir.change_permissions("755")
+            mock_chmod.assert_called_with(path, 0o755)
+            dir.change_permissions("777")
+            mock_chmod.assert_called_with(path, 0o777)
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32", reason="Permissions are not supported on Windows."
-)
 def test_change_owner(setup_data):
-    with patch('wrapkit.file_system.directory.os.chown') as mock_chown:
-        dirPaths, filePaths = setup_data
-        path = join(dirPaths["real"], "new_dir")
-        dir = Directory(path, create=True)
-        dir.change_owner("root", "root")
-        
-        # Check if os.chown was called with correct arguments
-        mock_chown.assert_called_with(path, 0, 0)  # Replace 1000 with the actual uid and gid
+    if os.name == "nt":
+        with pytest.raises(NotImplementedError):
+            dir.change_owner("root", "root")
+    else:
+        with patch("wrapkit.file_system.directory.os.chown") as mock_chown:
+            dirPaths, filePaths = setup_data
+            path = join(dirPaths["real"], "new_dir")
+            dir = Directory(path, create=True)
+
+            dir.change_owner("root", "root")
+            mock_chown.assert_called_with(path, 0, 0)
