@@ -7,7 +7,7 @@ import pytest
 
 from wrapkit.file_system import Directory
 import tempfile as tf
-from _test_util import create_file, create_directory, delete_file, delete_directory
+from ._test_util import create_file, create_directory, delete_file, delete_directory
 from os.path import join
 
 
@@ -731,4 +731,4 @@ def test_temporary_directory(setup_data):
 
 if __name__ == "__main__":
     # execute test_temporary_directory only
-    pytest.main(["-s", "-v", __file__ + "::test_temporary_directory"])
+    pytest.main()

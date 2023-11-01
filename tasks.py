@@ -18,6 +18,7 @@ def install_packages(c, packages):
 
 @task
 def test(c):
+    c.run("pip install .")
     c.run("pytest tests")
 
 
