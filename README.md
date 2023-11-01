@@ -79,7 +79,7 @@ python WrapKit
   # Create a directory
   directory = Directory(path="my_directory")
   directory.create()
-  directory.add_file(file)
+  directory.write_file(file)
   ```
 
 ## Running tests
